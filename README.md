@@ -56,31 +56,18 @@ Input (224×224×3)
 ```
 CNN-PROJECT/
 │
-├── train_model.py              # Main PyTorch DSC-CNN training script
-├── training_28.py              # Training variant (28-epoch run)
-├── evaluate.py                 # Model evaluation — accuracy, F1, AUC
-├── predict.py                  # Single image prediction (USB mode)
-├── predict1.py                 # Prediction variant
-├── auto_predict.py             # Automated batch prediction
-├── cam.py                      # Live Pi Camera inference (Mode 2)
-├── test.py                     # Test set evaluation script
+├── dsc_cnn_train.py                      # Main DSC-CNN training script
+├── mobilenet_trainingmodel.py            # MobileNet transfer learning variant
+├── evaluate.py                           # Model evaluation — accuracy, F1, AUC
+├── predict.py                            # Single image prediction (USB mode)
+├── auto_predict.py                       # Automated batch prediction
 │
-├── convert.py                  # PyTorch → ONNX conversion
-├── convert2.py                 # ONNX → TFLite conversion
-├── tf_model.py                 # TensorFlow model definition
-├── to_tflite.py                # TFLite export script
+├── mobilenet_model_10_epoch.pth          # MobileNet model — 10 epochs
+├── mobilenet_20ep_88.43a.pth             # MobileNet model — 20 epochs (88.43%)
 │
-├── skin_cancer_model.pth       # Trained PyTorch model (base)
-├── model_29_epoch.pth          # PyTorch model — 29 epochs
-├── model20_epoch.pth           # PyTorch model — 20 epochs
-├── model30_epoch_88.95_acc.pth # PyTorch model — 30 epochs (88.95%)
-├── skin_cancer_model.onnx      # Exported ONNX model
 ├── edge_impulse_10_epochs_92.1_accuracy.eim  # Edge Impulse ARM binary
 │
-├── tf_model/                   # TensorFlow SavedModel directory
-├── melanoma_cancer_dataset/    # HAM10000 dataset (local copy)
-├── melanoma_cancer_dataset.zip # Dataset archive
-└── captured.jpg                # Sample Pi Camera capture
+└── captured.jpg                          # Sample Pi Camera capture
 ```
 
 ---
