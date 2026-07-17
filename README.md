@@ -1,12 +1,17 @@
 # 🔬 Skin Cancer Detection Using CNN on Raspberry Pi
 
-> Real-time binary skin lesion classification (Benign vs Malignant) using a lightweight Depthwise Separable CNN deployed on Raspberry Pi 4 — no GPU required.
+> Real-time binary skin lesion classification (Benign vs Malignant) using lightweight CNNs deployed on Raspberry Pi 4 — no GPU required.
 
 ---
 
 ## 📌 Project Overview
 
-This project implements a lightweight Convolutional Neural Network (DSC-CNN) for skin cancer detection, optimized for real-time inference on Raspberry Pi 4. Two training frameworks are compared — **PyTorch** and **Edge Impulse EON Tuner** — across 10, 20, and 30 training epochs.
+This project implements and compares two lightweight CNN architectures for skin cancer detection, optimized for real-time inference on Raspberry Pi 4:
+
+1. **Custom DSC-CNN** — Depthwise Separable Convolution CNN trained from scratch
+2. **MobileNet** — Transfer learning based model
+
+Both models are trained and evaluated across **10, 20, and 30 epochs** on the HAM10000 dermoscopic dataset. The trained PyTorch model (`.pth`) is directly deployed on Raspberry Pi 4 via a Python inference script with Pi Camera integration — no ONNX or TFLite conversion required.
 
 The system outputs a clinician-advisory message with confidence score in under **1.3 seconds** per image on Raspberry Pi without any external GPU.
 
@@ -19,22 +24,34 @@ The system outputs a clinician-advisory message with confidence score in under *
 
 ## 🎯 Key Results
 
-| Framework | Epochs | Accuracy |
-|---|---|---|
-| PyTorch DSC-CNN | 10 | **92.3%** |
-| Edge Impulse EON | 20 | **91.7%** |
-| Proposed (CNN) | — | **91.2% @ 1.3s on Pi** |
+### DSC-CNN (Custom — Trained from Scratch)
+
+| Epochs | Accuracy |
+|---|---|
+| 10 | **92.3%** |
+| 20 | 88.77% |
+| 30 | 86.3% |
+
+### MobileNet (Transfer Learning)
+
+| Epochs | Accuracy |
+|---|---|
+| 10 | 91.2% |
+| 20 | **88.43%** |
+
+**Key finding:** DSC-CNN converges faster at low epochs but overfits beyond epoch 10. MobileNet with transfer learning gives more stable results due to pretrained ImageNet weights.
 
 - ✅ Real-time inference: **< 1.3s per image** on Raspberry Pi 4
-- ✅ Model size after INT8 quantization: **< 8.5 MB**
-- ✅ INT8 quantization: **74% size reduction**, only **0.4% accuracy drop**
+- ✅ Model size: **< 8.5 MB**
 - ✅ AUC-ROC: **0.91**
+- ✅ No GPU required on deployment
 
 ---
 
-## 🧠 Model Architecture
+## 🧠 Model Architectures
 
-Custom **DSC-CNN** (Depthwise Separable Convolution CNN) inspired by MobileNet:
+### 1. Custom DSC-CNN
+Depthwise Separable Convolution CNN inspired by MobileNet design:
 
 ```
 Input (224×224×3)
@@ -46,8 +63,13 @@ Input (224×224×3)
 ```
 
 - **Parameters:** ~2.1 M
-- **Model size (FP32):** ~8.5 MB
+- **Model size:** ~8.5 MB
 - **Computation reduction:** ~8.6× vs standard convolutions
+
+### 2. MobileNet (Transfer Learning)
+- Pretrained on ImageNet
+- Final classification layer replaced for binary output
+- Fine-tuned on HAM10000
 
 ---
 
@@ -56,18 +78,18 @@ Input (224×224×3)
 ```
 CNN-PROJECT/
 │
-├── dsc_cnn_train.py                      # Main DSC-CNN training script
-├── mobilenet_trainingmodel.py            # MobileNet transfer learning variant
-├── evaluate.py                           # Model evaluation — accuracy, F1, AUC
-├── predict.py                            # Single image prediction (USB mode)
-├── auto_predict.py                       # Automated batch prediction
+├── dsc_cnn_train.py                          # Custom DSC-CNN training script
+├── mobilenet_trainingmodel.py                # MobileNet transfer learning training
+├── evaluate.py                               # Model evaluation — accuracy, F1, confusion matrix
+├── predict.py                                # Single image prediction
+├── predict1.py                               # Prediction variant
+├── auto_predict.py                           # Automated batch prediction on Pi
 │
-├── mobilenet_model_10_epoch.pth          # MobileNet model — 10 epochs
-├── mobilenet_20ep_88.43a.pth             # MobileNet model — 20 epochs (88.43%)
+├── mobilenet_model_10_epoch.pth              # MobileNet — 10 epochs
+├── mobilenet_20ep_88.43a.pth                 # MobileNet — 20 epochs (88.43%)
 │
-├── edge_impulse_10_epochs_92.1_accuracy.eim  # Edge Impulse ARM binary
-│
-└── captured.jpg                          # Sample Pi Camera capture
+├── edge_impulse_10_epochs_92.1_accuracy.eim  # Edge Impulse ARM binary (experimental)
+└── captured.jpg                              # Sample Pi Camera capture
 ```
 
 ---
@@ -105,37 +127,31 @@ CNN-PROJECT/
 ### Requirements
 
 ```bash
-pip install torch torchvision opencv-python pillow numpy scikit-learn
+pip install torch torchvision opencv-python pillow numpy scikit-learn seaborn matplotlib
 ```
 
-### Training
+### Train DSC-CNN
 
 ```bash
-python train_model.py
+python dsc_cnn_train.py
 ```
 
-### Evaluation
+### Train MobileNet
+
+```bash
+python mobilenet_trainingmodel.py
+```
+
+### Evaluate Model
 
 ```bash
 python evaluate.py
 ```
 
-### Inference — USB Image Mode (Recommended)
+### Run Inference
 
 ```bash
 python predict.py --image path/to/image.jpg
-```
-
-### Inference — Pi Camera Live Feed
-
-```bash
-python cam.py
-```
-
-### Convert to ONNX
-
-```bash
-python convert.py
 ```
 
 ---
@@ -147,41 +163,29 @@ python convert.py
 - Raspberry Pi Camera Module v2 (Sony IMX219, 8MP)
 - 7" HDMI Touchscreen
 
-**Two input modes supported:**
+**Deployment flow:**
+1. Train model on laptop GPU → save as `.pth`
+2. Transfer `.pth` file to Raspberry Pi
+3. Run `auto_predict.py` directly on Pi with PyTorch
+4. Pi Camera captures live image → preprocessed → model inference → result displayed
 
-| Mode | Input | SSIM | Confidence |
-|---|---|---|---|
-| Mode 1 (Recommended) | USB dermoscopic image | 1.00 (reference) | 88.5% |
-| Mode 2 | Pi Camera live feed | 0.61 ± 0.09 | 74.3% |
+**No ONNX or TFLite conversion needed — direct PyTorch inference on Pi.**
 
-**Advisory output displayed on Tkinter GUI:**
+**Advisory output:**
 - 🔴 Malignant OR confidence < 75% → *"Consult a Dermatologist — Do not self-diagnose."*
 - 🟢 Benign AND confidence ≥ 75% → *"Likely Normal — Consult a doctor for confirmation."*
-- ⚠️ SSIM < 0.70 → *"Low image quality detected. Use a USB dermoscopic image."*
 
 ---
 
-## 📈 Framework Comparison — PyTorch vs Edge Impulse
+## 📈 Epoch-wise Accuracy Comparison
 
-| Epochs | PyTorch Acc (%) | Edge Impulse Acc (%) |
+| Epochs | DSC-CNN (%) | MobileNet (%) |
 |---|---|---|
 | 10 | **92.3** | 91.2 |
-| 20 | 88.77 | **91.7** |
-| 30 | 86.3 | **92.4** |
+| 20 | 88.77 | **88.43** |
+| 30 | 86.3 | — |
 
-**Key finding:** PyTorch converges faster at low epochs but overfits beyond epoch 10. Edge Impulse EON Tuner's hardware-aware regularization generalizes better at higher epochs — better suited for Raspberry Pi deployment.
-
----
-
-## 🔧 Post-Training Optimization
-
-| Technique | Effect |
-|---|---|
-| Structured Pruning | Removed bottom 25–30% filters per layer |
-| INT8 Dynamic Quantization | 4× model size reduction, 2–3× latency reduction |
-| ONNX Export (opset 13) | Cross-platform validation |
-| TorchScript (.pt) | Raspberry Pi inference |
-| Edge Impulse (.eim binary) | ARM-optimized deployment |
+DSC-CNN overfits after epoch 10 on the relatively small HAM10000 training set. MobileNet's pretrained weights provide better regularization and stability across epochs.
 
 ---
 
@@ -199,7 +203,7 @@ python convert.py
 
 ## 🏷️ Tech Stack
 
-`Python` `PyTorch` `Edge Impulse` `OpenCV` `ONNX` `TFLite` `Raspberry Pi` `HAM10000` `Tkinter`
+`Python` `PyTorch` `OpenCV` `Edge Impulse` `Raspberry Pi` `HAM10000` `Tkinter` `Seaborn` `Matplotlib`
 
 ---
 
