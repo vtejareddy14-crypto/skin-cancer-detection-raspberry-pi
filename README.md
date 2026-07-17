@@ -15,10 +15,18 @@ Both models are trained and evaluated across **10, 20, and 30 epochs** on the HA
 
 The system outputs a clinician-advisory message with confidence score in under **1.3 seconds** per image on Raspberry Pi without any external GPU.
 
-**Course:** BECE320E — Embedded C Programming  
-**Institution:** Vellore Institute of Technology, Vellore  
-**Team:** V. Sai Teja Reddy (23BVD0015) · L. Sai Varshit (23BEC0302)  
-**Supervisor:** Dr. Manish Kumar
+---
+
+## 🖥️ Screenshots
+
+### Edge Impulse Dataset
+![Edge Impulse Dataset](edge_impulse_dataset.png)
+
+### Edge Impulse Training Output (91.2% Accuracy)
+![Edge Impulse Training](edge_impulse_training.png)
+
+### Raspberry Pi Live Deployment
+![Raspberry Pi Deployment](raspberry_pi_deployment_result_interface.png)
 
 ---
 
@@ -39,7 +47,7 @@ The system outputs a clinician-advisory message with confidence score in under *
 | 10 | 91.2% |
 | 20 | **88.43%** |
 
-**Key finding:** DSC-CNN converges faster at low epochs but overfits beyond epoch 10. MobileNet with transfer learning gives more stable results due to pretrained ImageNet weights.
+**Key finding:** DSC-CNN converges faster at low epochs but overfits beyond epoch 10. MobileNet with pretrained ImageNet weights gives more stable results across epochs.
 
 - ✅ Real-time inference: **< 1.3s per image** on Raspberry Pi 4
 - ✅ Model size: **< 8.5 MB**
@@ -51,7 +59,6 @@ The system outputs a clinician-advisory message with confidence score in under *
 ## 🧠 Model Architectures
 
 ### 1. Custom DSC-CNN
-Depthwise Separable Convolution CNN inspired by MobileNet design:
 
 ```
 Input (224×224×3)
@@ -76,7 +83,7 @@ Input (224×224×3)
 ## 📁 Repository Structure
 
 ```
-CNN-PROJECT/
+skin-cancer-detection-raspberry-pi/
 │
 ├── dsc_cnn_train.py                          # Custom DSC-CNN training script
 ├── mobilenet_trainingmodel.py                # MobileNet transfer learning training
@@ -88,8 +95,10 @@ CNN-PROJECT/
 ├── mobilenet_model_10_epoch.pth              # MobileNet — 10 epochs
 ├── mobilenet_20ep_88.43a.pth                 # MobileNet — 20 epochs (88.43%)
 │
-├── edge_impulse_10_epochs_92.1_accuracy.eim  # Edge Impulse ARM binary (experimental)
-└── captured.jpg                              # Sample Pi Camera capture
+├── edge_impulse_10_epochs_92.1_accuracy.eim  # Edge Impulse ARM binary
+├── edge_impulse_dataset.png                  # Edge Impulse dataset screenshot
+├── edge_impulse_training.png                 # Edge Impulse training output screenshot
+└── raspberry_pi_deployment_result_interface.png  # Live deployment GUI screenshot
 ```
 
 ---
@@ -167,9 +176,7 @@ python predict.py --image path/to/image.jpg
 1. Train model on laptop GPU → save as `.pth`
 2. Transfer `.pth` file to Raspberry Pi
 3. Run `auto_predict.py` directly on Pi with PyTorch
-4. Pi Camera captures live image → preprocessed → model inference → result displayed
-
-**No ONNX or TFLite conversion needed — direct PyTorch inference on Pi.**
+4. Pi Camera captures live image → preprocessed → model inference → result displayed on screen
 
 **Advisory output:**
 - 🔴 Malignant OR confidence < 75% → *"Consult a Dermatologist — Do not self-diagnose."*
@@ -182,10 +189,8 @@ python predict.py --image path/to/image.jpg
 | Epochs | DSC-CNN (%) | MobileNet (%) |
 |---|---|---|
 | 10 | **92.3** | 91.2 |
-| 20 | 88.77 | **88.43** |
+| 20 | 88.77 | 88.43 |
 | 30 | 86.3 | — |
-
-DSC-CNN overfits after epoch 10 on the relatively small HAM10000 training set. MobileNet's pretrained weights provide better regularization and stability across epochs.
 
 ---
 
@@ -209,4 +214,4 @@ DSC-CNN overfits after epoch 10 on the relatively small HAM10000 training set. M
 
 ## 📄 License
 
-This project was developed as part of academic coursework at VIT Vellore. For research and educational use only. Not intended for clinical diagnosis.
+For research and educational use only. Not intended for clinical diagnosis.
