@@ -210,7 +210,7 @@ python predict.py --image path/to/image.jpg
 
 ## 🏷️ Tech Stack
 
-`Python` `PyTorch` `OpenCV` `Edge Impulse` `Raspberry Pi` `HAM10000` `Tkinter` `Seaborn` `Matplotlib`
+`Python` `PyTorch` `MobileNet` `OpenCV` `Edge Impulse` `EON Tuner` `Raspberry Pi 4` `Pi Camera` `HAM10000` `Tkinter` `Seaborn` `Matplotlib` `NumPy` `Scikit-learn` `ONNX` `TFLite` `INT8 Quantization` `Depthwise Separable CNN`
 
 ---
 
