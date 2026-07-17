@@ -21,7 +21,7 @@ The system outputs a clinician-advisory message with confidence score in under *
 
 ### Edge Impulse Dataset
 ![Edge Impulse Dataset](edge_impulse_dataset.png)
-<img width="1628" height="826" alt="image" src="https://github.com/user-attachments/assets/9777a04b-2170-471e-9619-616637587b7f" />
+
 
 
 ### Edge Impulse Training Output (91.2% Accuracy)
