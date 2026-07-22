@@ -211,7 +211,7 @@ python predict.py --image path/to/image.jpg
 
 For detailed Raspberry Pi deployment instructions, see:
 
-- [Raspberry Pi Deployment Guide](RASPBERRY_PI_DEPLOYMENT_GUIDE.md)
+- [Raspberry Pi Deployment Guide](Raspberry_Pi_Setup.md)
 
 ## 🏷️ Tech Stack
 
