@@ -207,6 +207,11 @@ python predict.py --image path/to/image.jpg
 | AUC-ROC | — | — | **0.91** |
 
 ---
+## 📖 Additional Documentation
+
+For detailed Raspberry Pi deployment instructions, see:
+
+- [Raspberry Pi Deployment Guide](RASPBERRY_PI_DEPLOYMENT_GUIDE.md)
 
 ## 🏷️ Tech Stack
 
