@@ -1,83 +1,110 @@
-# Skin Cancer Detection using Edge Impulse on Raspberry Pi
+# 🍓 Raspberry Pi Deployment Guide
 
-## Overview
-
-This project deploys a Skin Cancer Detection model trained using **Edge Impulse** on a **Raspberry Pi 4/5**. A **Tkinter-based GUI** allows users to select a skin lesion image and displays whether the lesion is **Benign** or **Malignant** along with the prediction confidence.
+This guide explains the deployment process used to run the trained skin cancer detection model on a Raspberry Pi 4/5.
 
 ---
 
-## Hardware Requirements
+# Hardware Requirements
 
 - Raspberry Pi 4 / Raspberry Pi 5
-- MicroSD Card (16 GB or higher)
-- Power Supply
+- Raspberry Pi OS (Bookworm/Bullseye)
+- Raspberry Pi Camera Module v2
 - Laptop/Desktop
-- Same Wi-Fi network for Raspberry Pi and Laptop
+- microSD Card (16 GB or higher)
+- Stable Wi-Fi connection
 
 ---
 
-## Software Requirements
+# Software Requirements
 
-- Raspberry Pi OS
+Install the following on the Raspberry Pi.
+
 - Python 3
+- pip
+- OpenCV
+- PyTorch
+- Pillow
+- NumPy
 - Tkinter
-- VNC Viewer
-- SCP (Secure Copy)
-- Edge Impulse Linux Deployment Package
+- VNC Server
+- SSH
 
 ---
 
-## Required Python Packages
+# Step 1 – Update Raspberry Pi
 
-Install the required packages on Raspberry Pi.
+Open Terminal and execute:
 
 ```bash
 sudo apt update
-sudo apt install python3-pip python3-tk unzip
-
-pip3 install numpy pillow edge_impulse_linux opencv-python
+sudo apt upgrade -y
 ```
 
-Or install using:
+---
+
+# Step 2 – Install Required Packages
+
+```bash
+sudo apt install python3-pip python3-tk python3-opencv unzip
+```
+
+Install Python libraries.
 
 ```bash
 pip3 install -r requirements.txt
 ```
 
----
-
-# Clone the Repository
+If installing manually:
 
 ```bash
-git clone <repository-link>
-cd <repository-folder>
+pip3 install torch torchvision pillow numpy opencv-python
 ```
 
 ---
 
-# Download the Edge Impulse Model
+# Step 3 – Enable SSH
 
-1. Open your Edge Impulse Project.
-2. Go to **Deployment**.
-3. Select **Linux (ARM 64-bit)**.
-4. Download the deployment package.
-5. Extract the downloaded package.
+SSH is required to transfer files from the laptop.
 
-Copy the generated model file (usually `.eim`) into the project folder.
+Run:
 
-Example:
+```bash
+sudo raspi-config
+```
+
+Navigate to:
 
 ```
-model.eim
+Interface Options
+    └── SSH
+            └── Enable
 ```
 
 ---
 
-# Connecting Raspberry Pi to Laptop
+# Step 4 – Enable VNC
 
-Both Raspberry Pi and Laptop should be connected to the same Wi-Fi network.
+To remotely access the Raspberry Pi desktop:
 
-### Find Raspberry Pi IP Address
+```bash
+sudo raspi-config
+```
+
+Navigate to
+
+```
+Interface Options
+    └── VNC
+            └── Enable
+```
+
+Restart the Raspberry Pi if prompted.
+
+---
+
+# Step 5 – Find Raspberry Pi IP Address
+
+Run:
 
 ```bash
 hostname -I
@@ -91,206 +118,199 @@ Example:
 
 ---
 
-## Enable VNC
-
-Open Raspberry Pi Terminal.
-
-```bash
-sudo raspi-config
-```
-
-Navigate to
-
-```
-Interface Options
-      ↓
-VNC
-      ↓
-Enable
-```
-
-Restart Raspberry Pi if required.
-
----
-
-## Connect Using VNC Viewer
+# Step 6 – Connect Using VNC Viewer
 
 Open **VNC Viewer** on your laptop.
 
-Enter
-
-```
-RaspberryPi_IP_Address
-```
-
-Example
+Connect using:
 
 ```
 192.168.1.20
 ```
 
-Login using Raspberry Pi credentials.
+Login using the Raspberry Pi username and password.
 
-```
-Username : <your_username>
-Password : <your_password>
-```
-
-The Raspberry Pi desktop will now be accessible from your laptop.
+After successful login, the Raspberry Pi desktop can be controlled remotely from the laptop.
 
 ---
 
-# Transfer Project Files using SCP
+# Step 7 – Transfer Project Files
 
-Open terminal on your laptop.
+The project files and trained model were transferred from the laptop to the Raspberry Pi using **Secure Copy Protocol (SCP)**.
 
-Transfer an entire project folder.
+Transfer the complete project folder.
 
 ```bash
-scp -r SkinCancerProject <username>@<RaspberryPi_IP>:/home/<username>/
+scp -r skin-cancer-detection-raspberry-pi teja-pi@192.168.1.20:/home/teja-pi/
 ```
 
-Example
+Transfer an individual file.
 
 ```bash
-scp -r SkinCancerProject teja-pi@192.168.1.20:/home/teja-pi/
+scp filename.py teja-pi@192.168.1.20:/home/teja-pi/
 ```
 
-Transfer a single file.
+After entering the Raspberry Pi password, the files will be copied to the Raspberry Pi.
+
+---
+
+# Step 8 – Navigate to the Project
 
 ```bash
-scp filename.py <username>@<RaspberryPi_IP>:/home/<username>/
+cd ~/skin-cancer-detection-raspberry-pi
 ```
 
----
-
-# Navigate to Project Directory
+Verify the files.
 
 ```bash
-cd ~/SkinCancerProject
+ls
 ```
 
 ---
 
-# Project Structure
+# Step 9 – Run the Model
 
-```
-SkinCancerProject
-│
-├── model.eim
-├── gui.py
-├── inference.py
-├── requirements.txt
-├── assets/
-├── images/
-└── README.md
-```
-
----
-
-# Running the Application
-
-Run the GUI.
+Run the prediction script.
 
 ```bash
-python3 gui.py
+python3 predict.py
 ```
 
----
-
-# GUI Features
-
-The Tkinter application provides:
-
-- Browse and select a skin lesion image.
-- Display the selected image.
-- Run inference using the Edge Impulse model.
-- Display prediction probabilities.
-- Display final prediction:
-  - Benign
-  - Malignant
-
----
-
-# Workflow
-
-```
-Train Model on Edge Impulse
-            │
-            ▼
-Download Linux Deployment (.eim)
-            │
-            ▼
-Transfer Project Files to Raspberry Pi using SCP
-            │
-            ▼
-Connect Raspberry Pi using VNC Viewer
-            │
-            ▼
-Run GUI Application
-            │
-            ▼
-Select Skin Image
-            │
-            ▼
-Edge Impulse Model Performs Inference
-            │
-            ▼
-Display Prediction (Benign / Malignant)
-```
-
----
-
-# Troubleshooting
-
-## Tkinter Module Not Found
-
-Install Tkinter.
+or
 
 ```bash
-sudo apt install python3-tk
+python3 auto_predict.py
+```
+
+depending on the deployment configuration.
+
+The script loads the trained `.pth` model, preprocesses the input image, performs inference, and displays the prediction.
+
+---
+
+# Tkinter Deployment Interface
+
+A lightweight graphical user interface (GUI) was developed using **Tkinter** to simplify interaction with the deployed model.
+
+The GUI performs the following tasks:
+
+- Loads the trained `.pth` model.
+- Allows the user to browse and select a skin lesion image.
+- Captures images using the Raspberry Pi Camera.
+- Preprocesses the input image.
+- Performs model inference.
+- Displays:
+  - Predicted class (Benign / Malignant)
+  - Confidence score
+  - Clinical advisory message
+
+> **Note:** The Tkinter GUI was used during deployment to demonstrate the system on the Raspberry Pi. The GUI source code is not included in this repository.
+
+---
+
+# Image Source Comparison
+
+To evaluate the robustness of the deployed model, predictions were compared using two different image sources.
+
+## 1. USB Image
+
+High-quality reference images from the dataset were supplied to the Raspberry Pi using USB storage.
+
+The trained model predicts:
+
+- Benign / Malignant
+- Prediction confidence
+
+These results were considered the reference predictions.
+
+---
+
+## 2. Raspberry Pi Camera
+
+The Raspberry Pi Camera Module was used to capture the same lesion under different lighting conditions.
+
+For every captured image, the model predicts:
+
+- Benign / Malignant
+- Prediction confidence
+
+---
+
+# Comparison Parameters
+
+The following metrics were compared:
+
+- Predicted class
+- Prediction confidence
+- Agreement between USB and Raspberry Pi Camera predictions
+- Effect of illumination on prediction confidence
+- Image quality differences
+
+This comparison helps evaluate how well the deployed model performs on real-world camera images compared with high-quality dataset images.
+
+---
+
+# Raspberry Pi Deployment Workflow
+
+```
+Train CNN Model
+        │
+        ▼
+Save Trained Model (.pth)
+        │
+        ▼
+Enable SSH & VNC
+        │
+        ▼
+Connect Raspberry Pi and Laptop
+        │
+        ▼
+Transfer Project using SCP
+        │
+        ▼
+Install Dependencies
+        │
+        ▼
+Load Trained Model
+        │
+        ▼
+Capture Image (USB / Pi Camera)
+        │
+        ▼
+Preprocess Image
+        │
+        ▼
+Run Model Inference
+        │
+        ▼
+Display Prediction
+        │
+        ▼
+Compare Confidence Scores
 ```
 
 ---
 
-## SCP Permission Denied
+# Deployment Interface
 
-Verify:
+The deployed Raspberry Pi interface is shown below.
 
-- Raspberry Pi is powered on.
-- Both devices are connected to the same Wi-Fi.
-- Username and IP address are correct.
-
----
-
-## VNC Connection Failed
-
-- Verify Raspberry Pi IP address.
-- Ensure VNC is enabled.
-- Confirm both devices are on the same network.
+```markdown
+![Raspberry Pi Deployment Interface](raspberry_pi_deployment_result_interface.png)
+```
 
 ---
 
-## Model File Not Found
+# Notes
 
-Place the downloaded `.eim` file in the project directory before running the application.
-
----
-
-# Technologies Used
-
-- Python
-- Edge Impulse
-- Raspberry Pi 4 / Raspberry Pi 5
-- Tkinter
-- NumPy
-- OpenCV
-- Pillow
-- VNC Viewer
-- SCP
+- Ensure both the Raspberry Pi and laptop are connected to the same Wi-Fi network.
+- Verify the Raspberry Pi IP address before connecting via VNC.
+- Enable SSH before attempting file transfer with SCP.
+- Place the trained `.pth` model inside the project directory before running inference.
+- For best results, capture images under consistent lighting conditions to reduce prediction variability.
 
 ---
 
-# Authors
+# Conclusion
 
-Developed as part of an Edge AI-based Skin Cancer Detection project using Raspberry Pi and Edge Impulse.
+The trained CNN model was successfully deployed on a Raspberry Pi 4/5 using PyTorch. Remote access was established using VNC Viewer, project files were transferred using SCP, and inference was performed locally on the Raspberry Pi. The deployment was further evaluated by comparing predictions from high-quality USB images and real-time Raspberry Pi Camera captures, demonstrating the feasibility of lightweight skin cancer detection on embedded hardware.
