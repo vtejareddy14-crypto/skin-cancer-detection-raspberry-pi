@@ -1,0 +1,10 @@
+torch
+torchvision
+opencv-python
+numpy
+Pillow
+matplotlib
+scikit-learn
+tqdm
+edge-impulse-linux
+edge-impulse-linux-runner
